@@ -11,7 +11,7 @@
 </template>
 
 <script>
-    import LottoBall from './LottoBall'
+    import LottoBall from './LottoBall';
 
     function getWinNumbers() {
         console.log('getWinNumbers');
@@ -24,6 +24,7 @@
         const winNumbers = shuffle.slice(0,6).sort((p,c) => p -c); // 오름차순 정렬
         return [...winNumbers, bonusNumber];
     }
+    const timeouts = [];
     export default {
         components: {
             'lotto-ball': LottoBall,
@@ -45,15 +46,14 @@
                 this.winBalls = [];
                 this.bonus = null;
                 this.redo = false;
-                this.showBalls();
             },
             showBalls() {
                 for (let i=0; i < this.winNumbers.length -1; i++) {
-                    setTimeout(() => {
+                    timeouts[i] = setTimeout(() => {
                         this.winBalls.push(this.winNumbers[i]);
                     }, (i + 1) * 1000);
                 }
-                setTimeout(() => {
+                timeouts[6] = setTimeout(() => {
                     this.bonus = this.winNumbers[6];
                     this.redo = true;
                 }, 7000);
@@ -63,10 +63,17 @@
             this.showBalls();
         },
         beforeDestroy() {
-
+            timeouts.forEach((t) => {
+                clearTimeout(t);
+            })
         },
         watch: {
-
+            winBalls(value, oldValue) {
+                console.log(value, oldValue)
+                if (value.length === 0) {
+                    this.showBalls();
+                }
+            }
         }
     };
 </script>
